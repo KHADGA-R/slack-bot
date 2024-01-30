@@ -19,10 +19,23 @@ slack_event_adapter = SlackEventAdapter(
 
 client = slack.WebClient(token=os.environ['SLACK_TOKEN'])
 
+BOT_ID = client.api_call("auth.test")['user_id']
 
 
-client.chat_postMessage(channel='#test', text="Hello World !")
-client.chat_postMessage(channel='#test', text="Hello ! Thank you for reaching out to us. How can I help you today ?")
+
+#client.chat_postMessage(channel='#test', text="Hello World !")
+#client.chat_postMessage(channel='#test', text="Hello ! Thank you for reaching out to us. How can I help you today ?")
+
+@slack_event_adapter.on('message')
+def message(payLoad):
+    event = payLoad.get('event', {})
+    channel_id = event.get('channel')
+    user_id = event.get('user')
+    text = event.get('text')
+
+
+    if BOT_ID != user_id:
+        client.chat_postMessage(channel=channel_id, text="Thank you for reaching out to us. How can I help you today ?")
 
 if __name__ == "__main__":
     app.run(debug=True)
